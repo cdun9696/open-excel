@@ -1,9 +1,9 @@
-import { Send } from "lucide-react";
+import { Send, Square } from "lucide-react";
 import { type KeyboardEvent, useCallback, useEffect, useRef, useState } from "react";
 import { useChat } from "./chat-context";
 
 export function ChatInput() {
-  const { sendMessage, state } = useChat();
+  const { sendMessage, state, abort } = useChat();
   const [input, setInput] = useState("");
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
@@ -36,8 +36,6 @@ export function ChatInput() {
     [handleSubmit],
   );
 
-  const isDisabled = !state.providerConfig || state.isStreaming;
-
   return (
     <div className="border-t border-(--chat-border) p-3 bg-(--chat-bg)" style={{ fontFamily: "var(--chat-font-mono)" }}>
       {state.error && <div className="text-(--chat-error) text-xs mb-2 px-1">{state.error}</div>}
@@ -63,22 +61,38 @@ export function ChatInput() {
             minHeight: "36px",
           }}
         />
-        <button
-          type="button"
-          onClick={handleSubmit}
-          disabled={isDisabled || !input.trim()}
-          className={`
-            p-2 border border-(--chat-border) bg-(--chat-bg-secondary)
-            text-(--chat-text-secondary)
-            hover:bg-(--chat-bg-tertiary) hover:text-(--chat-text-primary)
-            hover:border-(--chat-border-active)
-            disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:bg-(--chat-bg-secondary)
-            transition-colors
-          `}
-          style={{ borderRadius: "var(--chat-radius)" }}
-        >
-          <Send size={16} />
-        </button>
+        {state.isStreaming ? (
+          <button
+            type="button"
+            onClick={abort}
+            className={`
+              p-2 border border-(--chat-error) bg-(--chat-bg-secondary)
+              text-(--chat-error)
+              hover:bg-(--chat-error) hover:text-(--chat-bg)
+              transition-colors
+            `}
+            style={{ borderRadius: "var(--chat-radius)" }}
+          >
+            <Square size={16} />
+          </button>
+        ) : (
+          <button
+            type="button"
+            onClick={handleSubmit}
+            disabled={!state.providerConfig || !input.trim()}
+            className={`
+              p-2 border border-(--chat-border) bg-(--chat-bg-secondary)
+              text-(--chat-text-secondary)
+              hover:bg-(--chat-bg-tertiary) hover:text-(--chat-text-primary)
+              hover:border-(--chat-border-active)
+              disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:bg-(--chat-bg-secondary)
+              transition-colors
+            `}
+            style={{ borderRadius: "var(--chat-radius)" }}
+          >
+            <Send size={16} />
+          </button>
+        )}
       </div>
     </div>
   );
