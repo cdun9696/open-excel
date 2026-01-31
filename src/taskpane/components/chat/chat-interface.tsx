@@ -1,10 +1,31 @@
-import { MessageSquare, Settings, Trash2 } from "lucide-react";
+import { MessageSquare, Moon, Settings, Sun, Trash2 } from "lucide-react";
 import { type ReactNode, useState } from "react";
 import { ChatProvider, useChat } from "./chat-context";
 import { ChatInput } from "./chat-input";
 import { MessageList } from "./message-list";
 import { SettingsPanel } from "./settings-panel";
 import type { ChatTab } from "./types";
+
+type Theme = "light" | "dark";
+const THEME_KEY = "openexcel-theme";
+
+function useTheme() {
+  const [theme, setTheme] = useState<Theme>(() => {
+    const saved = localStorage.getItem(THEME_KEY) as Theme | null;
+    const initial = saved ?? (window.matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark");
+    document.documentElement.setAttribute("data-theme", initial);
+    return initial;
+  });
+
+  const toggle = () => {
+    const next = theme === "dark" ? "light" : "dark";
+    document.documentElement.setAttribute("data-theme", next);
+    localStorage.setItem(THEME_KEY, next);
+    setTheme(next);
+  };
+
+  return { theme, toggle };
+}
 
 function formatTokens(n: number): string {
   if (n >= 1_000_000) return `${(n / 1_000_000).toFixed(1)}M`;
@@ -78,7 +99,12 @@ function TabButton({ active, onClick, children }: { active: boolean; onClick: ()
   );
 }
 
-function ChatHeader({ activeTab, onTabChange }: { activeTab: ChatTab; onTabChange: (tab: ChatTab) => void }) {
+function ChatHeader({
+  activeTab,
+  onTabChange,
+  theme,
+  onThemeToggle,
+}: { activeTab: ChatTab; onTabChange: (tab: ChatTab) => void; theme: Theme; onThemeToggle: () => void }) {
   const { clearMessages, state } = useChat();
 
   return (
@@ -94,16 +120,26 @@ function ChatHeader({ activeTab, onTabChange }: { activeTab: ChatTab; onTabChang
             Settings
           </TabButton>
         </div>
-        {activeTab === "chat" && state.messages.length > 0 && (
+        <div className="flex items-center">
           <button
             type="button"
-            onClick={clearMessages}
-            className="p-1.5 text-(--chat-text-muted) hover:text-(--chat-error) transition-colors"
-            title="Clear messages"
+            onClick={onThemeToggle}
+            className="p-1.5 text-(--chat-text-muted) hover:text-(--chat-text-primary) transition-colors"
+            title={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"}
           >
-            <Trash2 size={14} />
+            {theme === "dark" ? <Sun size={14} /> : <Moon size={14} />}
           </button>
-        )}
+          {activeTab === "chat" && state.messages.length > 0 && (
+            <button
+              type="button"
+              onClick={clearMessages}
+              className="p-1.5 text-(--chat-text-muted) hover:text-(--chat-error) transition-colors"
+              title="Clear messages"
+            >
+              <Trash2 size={14} />
+            </button>
+          )}
+        </div>
       </div>
     </div>
   );
@@ -111,10 +147,11 @@ function ChatHeader({ activeTab, onTabChange }: { activeTab: ChatTab; onTabChang
 
 function ChatContent() {
   const [activeTab, setActiveTab] = useState<ChatTab>("chat");
+  const { theme, toggle } = useTheme();
 
   return (
     <div className="flex flex-col h-full bg-(--chat-bg)" style={{ fontFamily: "var(--chat-font-mono)" }}>
-      <ChatHeader activeTab={activeTab} onTabChange={setActiveTab} />
+      <ChatHeader activeTab={activeTab} onTabChange={setActiveTab} theme={theme} onThemeToggle={toggle} />
       {activeTab === "chat" ? (
         <>
           <MessageList />

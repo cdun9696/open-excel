@@ -32,6 +32,7 @@ type ToolCallPart = Extract<MessagePart, { type: "toolCall" }>;
 
 function ToolCallBlock({ part }: { part: ToolCallPart }) {
   const [isExpanded, setIsExpanded] = useState(false);
+  const explanation = (part.args as { explanation?: string })?.explanation;
 
   const statusIcon = {
     pending: <Loader2 size={10} className="animate-spin text-(--chat-text-muted)" />,
@@ -45,11 +46,11 @@ function ToolCallBlock({ part }: { part: ToolCallPart }) {
       <button
         type="button"
         onClick={() => setIsExpanded(!isExpanded)}
-        className="w-full flex items-center gap-1.5 px-2 py-1 text-[10px] uppercase tracking-wider text-(--chat-text-secondary) hover:bg-(--chat-bg-secondary) transition-colors"
+        className={`w-full flex items-center gap-1.5 px-2 py-1 text-[10px] tracking-wider text-(--chat-text-secondary) hover:bg-(--chat-bg-secondary) transition-colors ${explanation ? "normal-case" : "uppercase"}`}
       >
         {isExpanded ? <ChevronDown size={10} /> : <ChevronRight size={10} />}
         <Wrench size={10} />
-        <span className="flex-1 text-left font-medium">{part.name}</span>
+        <span className="flex-1 text-left font-medium">{explanation || part.name}</span>
         {statusIcon}
       </button>
       {isExpanded && (
@@ -81,14 +82,11 @@ function ToolCallBlock({ part }: { part: ToolCallPart }) {
 function LoadingIndicator() {
   return (
     <div
-      className="mr-8 px-3 py-2 bg-(--chat-assistant-bg) border border-(--chat-border)"
-      style={{ borderRadius: "var(--chat-radius)", fontFamily: "var(--chat-font-mono)" }}
+      className="flex items-center gap-2 text-(--chat-text-muted) text-sm"
+      style={{ fontFamily: "var(--chat-font-mono)" }}
     >
-      <div className="text-[10px] uppercase tracking-wider text-(--chat-text-muted) mb-1">assistant</div>
-      <div className="flex items-center gap-2 text-(--chat-text-muted) text-sm">
-        <Loader2 size={14} className="animate-spin" />
-        <span>thinking...</span>
-      </div>
+      <Loader2 size={14} className="animate-spin" />
+      <span>thinking...</span>
     </div>
   );
 }
@@ -127,7 +125,6 @@ function UserBubble({ message }: { message: ChatMessage }) {
       className="ml-8 px-3 py-2 text-sm leading-relaxed bg-(--chat-user-bg) border border-(--chat-border)"
       style={{ borderRadius: "var(--chat-radius)", fontFamily: "var(--chat-font-mono)" }}
     >
-      <div className="text-[10px] uppercase tracking-wider text-(--chat-text-muted) mb-1">you</div>
       {renderParts(message.parts, false, message.id)}
     </div>
   );
@@ -149,10 +146,9 @@ function AssistantBubble({ messages, isStreaming }: { messages: ChatMessage[]; i
 
   return (
     <div
-      className="mr-8 px-3 py-2 text-sm leading-relaxed bg-(--chat-assistant-bg) border border-(--chat-border)"
-      style={{ borderRadius: "var(--chat-radius)", fontFamily: "var(--chat-font-mono)" }}
+      className="text-sm leading-relaxed"
+      style={{ fontFamily: "var(--chat-font-mono)" }}
     >
-      <div className="text-[10px] uppercase tracking-wider text-(--chat-text-muted) mb-1">assistant</div>
       {allParts.map(({ part, messageId, isLast }, idx) => {
         const key = part.type === "toolCall" ? part.id : `${messageId}-${part.type}-${idx}`;
         if (part.type === "thinking") {
@@ -203,7 +199,7 @@ export function MessageList() {
     if (containerRef.current) {
       containerRef.current.scrollTop = containerRef.current.scrollHeight;
     }
-  }, []);
+  }, [state.messages, state.isStreaming]);
 
   if (state.messages.length === 0) {
     return (
