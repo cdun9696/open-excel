@@ -18,19 +18,19 @@ export const getCellRangesTool = defineTool({
       Type.Boolean({
         description: "Include font/fill styling info. Default: true",
         default: true,
-      })
+      }),
     ),
     cellLimit: Type.Optional(
       Type.Number({
         description: "Maximum cells to return. Default: 2000",
         default: 2000,
-      })
+      }),
     ),
     explanation: Type.Optional(
       Type.String({
         description: "Brief explanation of what you're reading (max 50 chars)",
         maxLength: 50,
-      })
+      }),
     ),
   }),
   execute: async (_toolCallId, params) => {

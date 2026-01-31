@@ -177,7 +177,6 @@ function extractPartsFromAssistantMessage(message: AgentMessage, existingParts: 
   });
 }
 
-
 export function ChatProvider({ children }: { children: ReactNode }) {
   const [state, setState] = useState<ChatState>(() => {
     const saved = loadSavedConfig();

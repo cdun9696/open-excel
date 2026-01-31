@@ -12,17 +12,15 @@ export const clearCellRangeTool = defineTool({
     sheetId: Type.Number({ description: "The worksheet ID (1-based index)" }),
     range: Type.String({ description: "Range to clear in A1 notation" }),
     clearType: Type.Optional(
-      Type.Union([
-        Type.Literal("contents"),
-        Type.Literal("all"),
-        Type.Literal("formats"),
-      ], { description: "What to clear. Default: 'contents'" })
+      Type.Union([Type.Literal("contents"), Type.Literal("all"), Type.Literal("formats")], {
+        description: "What to clear. Default: 'contents'",
+      }),
     ),
     explanation: Type.Optional(
       Type.String({
         description: "Brief explanation (max 50 chars)",
         maxLength: 50,
-      })
+      }),
     ),
   }),
   execute: async (_toolCallId, params) => {

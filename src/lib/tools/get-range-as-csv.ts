@@ -16,19 +16,19 @@ export const getRangeAsCsvTool = defineTool({
       Type.Boolean({
         description: "Include first row as headers. Default: true",
         default: true,
-      })
+      }),
     ),
     maxRows: Type.Optional(
       Type.Number({
         description: "Maximum rows to return. Default: 500",
         default: 500,
-      })
+      }),
     ),
     explanation: Type.Optional(
       Type.String({
         description: "Brief explanation of what you're reading (max 50 chars)",
         maxLength: 50,
-      })
+      }),
     ),
   }),
   execute: async (_toolCallId, params) => {

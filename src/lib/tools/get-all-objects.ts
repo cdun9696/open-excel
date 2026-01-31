@@ -15,7 +15,7 @@ export const getAllObjectsTool = defineTool({
       Type.String({
         description: "Brief explanation (max 50 chars)",
         maxLength: 50,
-      })
+      }),
     ),
   }),
   execute: async (_toolCallId, params) => {

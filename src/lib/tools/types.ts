@@ -11,11 +11,7 @@ export function defineTool<T extends TObject>(config: {
   label: string;
   description: string;
   parameters: T;
-  execute: (
-    toolCallId: string,
-    params: Static<T>,
-    signal?: AbortSignal
-  ) => Promise<ToolResult>;
+  execute: (toolCallId: string, params: Static<T>, signal?: AbortSignal) => Promise<ToolResult>;
 }): AgentTool {
   return config as unknown as AgentTool;
 }

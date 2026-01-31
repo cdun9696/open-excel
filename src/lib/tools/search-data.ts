@@ -10,7 +10,7 @@ const SearchOptionsSchema = Type.Optional(
     useRegex: Type.Optional(Type.Boolean({ description: "Use regex pattern. Default: false" })),
     ignoreDiacritics: Type.Optional(Type.Boolean({ description: "Ignore accents. Default: true" })),
     maxResults: Type.Optional(Type.Number({ description: "Max results. Default: 500" })),
-  })
+  }),
 );
 
 export const searchDataTool = defineTool({
@@ -30,7 +30,7 @@ export const searchDataTool = defineTool({
       Type.String({
         description: "Brief explanation of what you're searching (max 50 chars)",
         maxLength: 50,
-      })
+      }),
     ),
   }),
   execute: async (_toolCallId, params) => {

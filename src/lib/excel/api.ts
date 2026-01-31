@@ -62,7 +62,7 @@ function excelColorToHex(color: Excel.RangeFont | Excel.RangeFill): string | und
 
 export async function getWorksheetById(
   context: Excel.RequestContext,
-  sheetId: number
+  sheetId: number,
 ): Promise<Excel.Worksheet | null> {
   const sheets = context.workbook.worksheets;
   sheets.load("items");
@@ -90,7 +90,7 @@ export async function getWorksheetById(
 export async function getCellRanges(
   sheetId: number,
   ranges: string[],
-  options: { includeStyles?: boolean; cellLimit?: number } = {}
+  options: { includeStyles?: boolean; cellLimit?: number } = {},
 ): Promise<GetCellRangesResult> {
   const { includeStyles = true, cellLimit = 2000 } = options;
 
@@ -132,7 +132,9 @@ export async function getCellRanges(
 
       const startAddress = range.address.split("!")[1]?.split(":")[0] || "A1";
       const startMatch = startAddress.match(/([A-Z]+)(\d+)/);
-      const startCol = startMatch ? startMatch[1].split("").reduce((acc, c) => acc * 26 + c.charCodeAt(0) - 64, 0) - 1 : 0;
+      const startCol = startMatch
+        ? startMatch[1].split("").reduce((acc, c) => acc * 26 + c.charCodeAt(0) - 64, 0) - 1
+        : 0;
       const startRow = startMatch ? Number.parseInt(startMatch[2], 10) - 1 : 0;
 
       for (let r = 0; r < range.rowCount && totalCells < cellLimit; r++) {
@@ -204,7 +206,7 @@ export interface GetRangeAsCsvResult {
 export async function getRangeAsCsv(
   sheetId: number,
   rangeAddr: string,
-  options: { includeHeaders?: boolean; maxRows?: number } = {}
+  options: { includeHeaders?: boolean; maxRows?: number } = {},
 ): Promise<GetRangeAsCsvResult> {
   const { maxRows = 500 } = options;
 
@@ -277,7 +279,7 @@ export async function searchData(
     matchFormulas?: boolean;
     useRegex?: boolean;
     maxResults?: number;
-  } = {}
+  } = {},
 ): Promise<SearchDataResult> {
   const {
     sheetId,
@@ -297,12 +299,10 @@ export async function searchData(
 
     const matches: SearchMatch[] = [];
     const sheetsToSearch = sheetId
-      ? [await getWorksheetById(context, sheetId)].filter(Boolean) as Excel.Worksheet[]
+      ? ([await getWorksheetById(context, sheetId)].filter(Boolean) as Excel.Worksheet[])
       : sheets.items;
 
-    const pattern = useRegex
-      ? new RegExp(searchTerm, matchCase ? "" : "i")
-      : null;
+    const pattern = useRegex ? new RegExp(searchTerm, matchCase ? "" : "i") : null;
 
     for (const sheet of sheetsToSearch) {
       sheet.load("name,id");
@@ -375,9 +375,7 @@ export interface GetAllObjectsResult {
   objects: ExcelObject[];
 }
 
-export async function getAllObjects(
-  options: { sheetId?: number; id?: string } = {}
-): Promise<GetAllObjectsResult> {
+export async function getAllObjects(options: { sheetId?: number; id?: string } = {}): Promise<GetAllObjectsResult> {
   const { sheetId, id } = options;
 
   return Excel.run(async (context) => {
@@ -387,7 +385,7 @@ export async function getAllObjects(
 
     const objects: ExcelObject[] = [];
     const sheetsToCheck = sheetId
-      ? [await getWorksheetById(context, sheetId)].filter(Boolean) as Excel.Worksheet[]
+      ? ([await getWorksheetById(context, sheetId)].filter(Boolean) as Excel.Worksheet[])
       : sheets.items;
 
     for (const sheet of sheetsToCheck) {
@@ -471,7 +469,7 @@ export async function setCellRange(
     resizeWidth?: { type: "points" | "standard"; value: number };
     resizeHeight?: { type: "points" | "standard"; value: number };
     allowOverwrite?: boolean;
-  } = {}
+  } = {},
 ): Promise<SetCellRangeResult> {
   const { copyToRange, resizeWidth, resizeHeight } = options;
 
@@ -504,9 +502,7 @@ export async function setCellRange(
     }
 
     if (hasFormulas) {
-      range.formulas = formulas.map((row, r) =>
-        row.map((f, c) => f ?? values[r][c])
-      );
+      range.formulas = formulas.map((row, r) => row.map((f, c) => f ?? values[r][c]));
     } else {
       range.values = values;
     }
@@ -545,7 +541,7 @@ export async function setCellRange(
 
     if (copyToRange) {
       const destRange = sheet.getRange(copyToRange);
-      range.copyFrom(range, Excel.RangeCopyType.all);
+      destRange.copyFrom(range, Excel.RangeCopyType.all);
       await context.sync();
     }
 
@@ -590,7 +586,7 @@ export interface ClearCellRangeResult {
 export async function clearCellRange(
   sheetId: number,
   rangeAddr: string,
-  clearType: "contents" | "all" | "formats" = "contents"
+  clearType: "contents" | "all" | "formats" = "contents",
 ): Promise<ClearCellRangeResult> {
   return Excel.run(async (context) => {
     const sheet = await getWorksheetById(context, sheetId);
@@ -622,11 +618,7 @@ export interface CopyToResult {
   destination: string;
 }
 
-export async function copyTo(
-  sheetId: number,
-  sourceRange: string,
-  destinationRange: string
-): Promise<CopyToResult> {
+export async function copyTo(sheetId: number, sourceRange: string, destinationRange: string): Promise<CopyToResult> {
   return Excel.run(async (context) => {
     const sheet = await getWorksheetById(context, sheetId);
     if (!sheet) throw new Error(`Worksheet with ID ${sheetId} not found`);
@@ -653,9 +645,9 @@ export async function modifySheetStructure(
     reference?: string;
     count?: number;
     position?: "before" | "after";
-  }
+  },
 ): Promise<ModifySheetStructureResult> {
-  const { operation, dimension, reference, count = 1, position = "before" } = params;
+  const { operation, dimension, reference, count: _count = 1, position = "before" } = params;
 
   return Excel.run(async (context) => {
     const sheet = await getWorksheetById(context, sheetId);
@@ -673,9 +665,13 @@ export async function modifySheetStructure(
       switch (operation) {
         case "insert":
           if (isRow) {
-            targetRange.insert(position === "before" ? Excel.InsertShiftDirection.down : Excel.InsertShiftDirection.down);
+            targetRange.insert(
+              position === "before" ? Excel.InsertShiftDirection.down : Excel.InsertShiftDirection.down,
+            );
           } else {
-            targetRange.insert(position === "before" ? Excel.InsertShiftDirection.right : Excel.InsertShiftDirection.right);
+            targetRange.insert(
+              position === "before" ? Excel.InsertShiftDirection.right : Excel.InsertShiftDirection.right,
+            );
           }
           break;
         case "delete":
@@ -771,7 +767,7 @@ export async function resizeRange(
     range?: string;
     width?: { type: "points" | "standard"; value: number };
     height?: { type: "points" | "standard"; value: number };
-  }
+  },
 ): Promise<ResizeRangeResult> {
   const { range, width, height } = params;
 
@@ -920,11 +916,7 @@ export async function modifyObject(params: {
             throw new Error("Chart creation requires source and chartType");
           }
           const sourceRange = sheet.getRange(properties.source);
-          const chart = charts.add(
-            properties.chartType as Excel.ChartType,
-            sourceRange,
-            Excel.ChartSeriesBy.auto
-          );
+          const chart = charts.add(properties.chartType as Excel.ChartType, sourceRange, Excel.ChartSeriesBy.auto);
           if (properties.title) chart.title.text = properties.title;
           if (properties.anchor) {
             const anchorCell = sheet.getRange(properties.anchor);
@@ -959,11 +951,9 @@ export async function modifyObject(params: {
           }
           const sourceRange = sheet.getRange(properties.source);
           const destRange = sheet.getRange(properties.range);
-          const pivot = context.workbook.worksheets.getActiveWorksheet().pivotTables.add(
-            properties.name || "PivotTable",
-            sourceRange,
-            destRange
-          );
+          const pivot = context.workbook.worksheets
+            .getActiveWorksheet()
+            .pivotTables.add(properties.name || "PivotTable", sourceRange, destRange);
           pivot.load("id");
           await context.sync();
           return { success: true, operation, id: pivot.id };

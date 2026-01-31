@@ -11,7 +11,7 @@ const PivotFieldSchema = Type.Object({
       Type.Literal("average"),
       Type.Literal("max"),
       Type.Literal("min"),
-    ])
+    ]),
   ),
 });
 
@@ -33,7 +33,7 @@ const PropertiesSchema = Type.Object({
       Type.Literal("scatter"),
       Type.Literal("area"),
       Type.Literal("doughnut"),
-    ])
+    ]),
   ),
 });
 
@@ -45,25 +45,18 @@ export const modifyObjectTool = defineTool({
     "For charts, specify chartType, source, and anchor. " +
     "For pivot tables, specify source, range, rows, columns, and values.",
   parameters: Type.Object({
-    operation: Type.Union([
-      Type.Literal("create"),
-      Type.Literal("update"),
-      Type.Literal("delete"),
-    ], { description: "Operation to perform" }),
+    operation: Type.Union([Type.Literal("create"), Type.Literal("update"), Type.Literal("delete")], {
+      description: "Operation to perform",
+    }),
     sheetId: Type.Number({ description: "The worksheet ID (1-based index)" }),
-    objectType: Type.Union([
-      Type.Literal("pivotTable"),
-      Type.Literal("chart"),
-    ], { description: "Type of object" }),
-    id: Type.Optional(
-      Type.String({ description: "Object ID (required for update/delete)" })
-    ),
+    objectType: Type.Union([Type.Literal("pivotTable"), Type.Literal("chart")], { description: "Type of object" }),
+    id: Type.Optional(Type.String({ description: "Object ID (required for update/delete)" })),
     properties: Type.Optional(PropertiesSchema),
     explanation: Type.Optional(
       Type.String({
         description: "Brief explanation (max 50 chars)",
         maxLength: 50,
-      })
+      }),
     ),
   }),
   execute: async (_toolCallId, params) => {

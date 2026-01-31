@@ -104,7 +104,12 @@ function ChatHeader({
   onTabChange,
   theme,
   onThemeToggle,
-}: { activeTab: ChatTab; onTabChange: (tab: ChatTab) => void; theme: Theme; onThemeToggle: () => void }) {
+}: {
+  activeTab: ChatTab;
+  onTabChange: (tab: ChatTab) => void;
+  theme: Theme;
+  onThemeToggle: () => void;
+}) {
   const { clearMessages, state } = useChat();
 
   return (

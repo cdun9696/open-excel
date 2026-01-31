@@ -68,7 +68,9 @@ function ToolCallBlock({ part }: { part: ToolCallPart }) {
               <div className="text-(--chat-text-muted) text-[10px] uppercase mb-1">
                 {part.status === "error" ? "error" : "result"}
               </div>
-              <div className={`markdown-content max-h-40 overflow-y-auto [&_[data-streamdown=code-block]]:my-0 [&_[data-streamdown=code-block]]:border-0 ${part.status === "error" ? "[&_code]:!text-red-400" : ""}`}>
+              <div
+                className={`markdown-content max-h-40 overflow-y-auto [&_[data-streamdown=code-block]]:my-0 [&_[data-streamdown=code-block]]:border-0 ${part.status === "error" ? "[&_code]:!text-red-400" : ""}`}
+              >
                 <Streamdown plugins={{ code }}>{`\`\`\`json\n${part.result}\n\`\`\``}</Streamdown>
               </div>
             </div>
@@ -108,7 +110,11 @@ function CitationLink({ href, children, ...props }: AnchorHTMLAttributes<HTMLAnc
   const citation = href ? parseCitationUri(href) : null;
 
   if (!citation) {
-    return <a href={href} target="_blank" rel="noopener noreferrer" {...props}>{children}</a>;
+    return (
+      <a href={href} target="_blank" rel="noopener noreferrer" {...props}>
+        {children}
+      </a>
+    );
   }
 
   return (
@@ -182,10 +188,7 @@ function AssistantBubble({ messages, isStreaming }: { messages: ChatMessage[]; i
   }
 
   return (
-    <div
-      className="text-sm leading-relaxed"
-      style={{ fontFamily: "var(--chat-font-mono)" }}
-    >
+    <div className="text-sm leading-relaxed" style={{ fontFamily: "var(--chat-font-mono)" }}>
       {allParts.map(({ part, messageId, isLast }, idx) => {
         const key = part.type === "toolCall" ? part.id : `${messageId}-${part.type}-${idx}`;
         if (part.type === "thinking") {
@@ -247,6 +250,7 @@ export function MessageList() {
     return () => container.removeEventListener("scroll", handleScroll);
   }, []);
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: intentional - trigger scroll on message/streaming changes
   useEffect(() => {
     if (containerRef.current && shouldAutoScroll.current) {
       containerRef.current.scrollTop = containerRef.current.scrollHeight;

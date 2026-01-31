@@ -25,7 +25,14 @@ function loadSavedConfig(): SavedConfig | null {
   return null;
 }
 
-function saveConfig(provider: string, apiKey: string, model: string, useProxy: boolean, proxyUrl: string, thinking: ThinkingLevel) {
+function saveConfig(
+  provider: string,
+  apiKey: string,
+  model: string,
+  useProxy: boolean,
+  proxyUrl: string,
+  thinking: ThinkingLevel,
+) {
   localStorage.setItem(STORAGE_KEY, JSON.stringify({ provider, apiKey, model, useProxy, proxyUrl, thinking }));
 }
 
@@ -233,7 +240,8 @@ export function SettingsPanel() {
         </p>
         {useProxy && (
           <p className="text-xs text-(--chat-text-muted) leading-relaxed mt-2">
-            CORS Proxy: Requests route through your proxy to bypass browser CORS restrictions. Required for Claude OAuth and Z.ai.
+            CORS Proxy: Requests route through your proxy to bypass browser CORS restrictions. Required for Claude OAuth
+            and Z.ai.
           </p>
         )}
       </div>

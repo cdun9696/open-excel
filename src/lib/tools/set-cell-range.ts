@@ -4,41 +4,30 @@ import { defineTool, toolError, toolSuccess } from "./types";
 
 const BorderStyleSchema = Type.Optional(
   Type.Object({
-    style: Type.Optional(Type.Union([
-      Type.Literal("solid"),
-      Type.Literal("dashed"),
-      Type.Literal("dotted"),
-      Type.Literal("double"),
-    ])),
-    weight: Type.Optional(Type.Union([
-      Type.Literal("thin"),
-      Type.Literal("medium"),
-      Type.Literal("thick"),
-    ])),
+    style: Type.Optional(
+      Type.Union([Type.Literal("solid"), Type.Literal("dashed"), Type.Literal("dotted"), Type.Literal("double")]),
+    ),
+    weight: Type.Optional(Type.Union([Type.Literal("thin"), Type.Literal("medium"), Type.Literal("thick")])),
     color: Type.Optional(Type.String()),
-  })
+  }),
 );
 
 const CellStylesSchema = Type.Optional(
   Type.Object({
     fontWeight: Type.Optional(Type.Union([Type.Literal("normal"), Type.Literal("bold")])),
     fontStyle: Type.Optional(Type.Union([Type.Literal("normal"), Type.Literal("italic")])),
-    fontLine: Type.Optional(Type.Union([
-      Type.Literal("none"),
-      Type.Literal("underline"),
-      Type.Literal("line-through"),
-    ])),
+    fontLine: Type.Optional(
+      Type.Union([Type.Literal("none"), Type.Literal("underline"), Type.Literal("line-through")]),
+    ),
     fontSize: Type.Optional(Type.Number()),
     fontFamily: Type.Optional(Type.String()),
     fontColor: Type.Optional(Type.String()),
     backgroundColor: Type.Optional(Type.String()),
-    horizontalAlignment: Type.Optional(Type.Union([
-      Type.Literal("left"),
-      Type.Literal("center"),
-      Type.Literal("right"),
-    ])),
+    horizontalAlignment: Type.Optional(
+      Type.Union([Type.Literal("left"), Type.Literal("center"), Type.Literal("right")]),
+    ),
     numberFormat: Type.Optional(Type.String()),
-  })
+  }),
 );
 
 const BorderStylesSchema = Type.Optional(
@@ -47,7 +36,7 @@ const BorderStylesSchema = Type.Optional(
     bottom: BorderStyleSchema,
     left: BorderStyleSchema,
     right: BorderStyleSchema,
-  })
+  }),
 );
 
 const CellSchema = Type.Object({
@@ -62,7 +51,7 @@ const ResizeSchema = Type.Optional(
   Type.Object({
     type: Type.Union([Type.Literal("points"), Type.Literal("standard")]),
     value: Type.Number(),
-  })
+  }),
 );
 
 export const setCellRangeTool = defineTool({
@@ -78,19 +67,15 @@ export const setCellRangeTool = defineTool({
     cells: Type.Array(Type.Array(CellSchema), {
       description: "2D array of cell data matching range dimensions",
     }),
-    copyToRange: Type.Optional(
-      Type.String({ description: "Expand pattern to larger range after writing" })
-    ),
+    copyToRange: Type.Optional(Type.String({ description: "Expand pattern to larger range after writing" })),
     resizeWidth: ResizeSchema,
     resizeHeight: ResizeSchema,
-    allow_overwrite: Type.Optional(
-      Type.Boolean({ description: "Confirm overwriting existing data" })
-    ),
+    allow_overwrite: Type.Optional(Type.Boolean({ description: "Confirm overwriting existing data" })),
     explanation: Type.Optional(
       Type.String({
         description: "Brief explanation (max 50 chars)",
         maxLength: 50,
-      })
+      }),
     ),
   }),
   execute: async (_toolCallId, params) => {
