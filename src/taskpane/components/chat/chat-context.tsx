@@ -132,6 +132,11 @@ WRITE:
 - resize_range: Adjust column widths and row heights
 - modify_object: Create/update/delete charts and pivot tables
 
+Citations: Use markdown links with #cite: hash to reference sheets/cells. Clicking navigates there.
+- Sheet only: [Sheet Name](#cite:sheetId)
+- Cell/range: [A1:B10](#cite:sheetId!A1:B10)
+Example: [Exchange Ratio](#cite:3) or [see cell B5](#cite:3!B5)
+
 When the user asks about their data, read it first. Be concise. Use A1 notation for cell references.`;
 
 function generateId(): string {

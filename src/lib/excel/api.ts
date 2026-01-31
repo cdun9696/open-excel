@@ -801,6 +801,35 @@ export interface ModifyObjectResult {
   id?: string;
 }
 
+export interface NavigateResult {
+  success: boolean;
+  sheetName?: string;
+  range?: string;
+}
+
+export async function navigateTo(sheetId: number, range?: string): Promise<NavigateResult> {
+  return Excel.run(async (context) => {
+    const sheet = await getWorksheetById(context, sheetId);
+    if (!sheet) throw new Error(`Worksheet with ID ${sheetId} not found`);
+
+    sheet.load("name");
+    sheet.activate();
+
+    if (range) {
+      const targetRange = sheet.getRange(range);
+      targetRange.select();
+    }
+
+    await context.sync();
+
+    return {
+      success: true,
+      sheetName: sheet.name,
+      ...(range && { range }),
+    };
+  });
+}
+
 export interface SheetMetadata {
   id: number;
   name: string;

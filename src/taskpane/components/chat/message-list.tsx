@@ -1,7 +1,9 @@
 import { code } from "@streamdown/code";
 import { Brain, CheckCircle2, ChevronDown, ChevronRight, Loader2, Wrench, XCircle } from "lucide-react";
+import type { AnchorHTMLAttributes } from "react";
 import { useEffect, useRef, useState } from "react";
 import { Streamdown } from "streamdown";
+import { navigateTo } from "../../../lib/excel/api";
 import { type ChatMessage, type MessagePart, useChat } from "./chat-context";
 
 function ThinkingBlock({ thinking, isStreaming }: { thinking: string; isStreaming?: boolean }) {
@@ -89,10 +91,47 @@ function LoadingIndicator() {
   );
 }
 
+function parseCitationUri(href: string): { sheetId: number; range?: string } | null {
+  if (!href.startsWith("#cite:")) return null;
+  const path = href.slice("#cite:".length);
+  const bangIdx = path.indexOf("!");
+  if (bangIdx === -1) {
+    const sheetId = Number.parseInt(path, 10);
+    return Number.isNaN(sheetId) ? null : { sheetId };
+  }
+  const sheetId = Number.parseInt(path.slice(0, bangIdx), 10);
+  const range = path.slice(bangIdx + 1);
+  return Number.isNaN(sheetId) ? null : { sheetId, range };
+}
+
+function CitationLink({ href, children, ...props }: AnchorHTMLAttributes<HTMLAnchorElement>) {
+  const citation = href ? parseCitationUri(href) : null;
+
+  if (!citation) {
+    return <a href={href} target="_blank" rel="noopener noreferrer" {...props}>{children}</a>;
+  }
+
+  return (
+    <button
+      type="button"
+      className="text-(--chat-accent) hover:underline cursor-pointer"
+      onClick={() => {
+        navigateTo(citation.sheetId, citation.range).catch((err) => {
+          console.error("[Citation] Navigation failed:", err);
+        });
+      }}
+    >
+      {children}
+    </button>
+  );
+}
+
+const markdownComponents = { a: CitationLink };
+
 function MarkdownContent({ text, isAnimating }: { text: string; isAnimating?: boolean }) {
   return (
     <div className="markdown-content">
-      <Streamdown plugins={{ code }} isAnimating={isAnimating}>
+      <Streamdown plugins={{ code }} components={markdownComponents} isAnimating={isAnimating}>
         {text}
       </Streamdown>
     </div>
