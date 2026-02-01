@@ -103,6 +103,7 @@ function SessionDropdown({ onSelect }: { onSelect: () => void }) {
   const { state, newSession, switchSession, deleteCurrentSession } = useChat();
   const [open, setOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const isStreaming = state.isStreaming;
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
@@ -155,23 +156,32 @@ function SessionDropdown({ onSelect }: { onSelect: () => void }) {
           <button
             type="button"
             onClick={handleNewSession}
-            className="w-full flex items-center gap-2 px-3 py-2 text-xs text-(--chat-accent) hover:bg-(--chat-bg-secondary) transition-colors border-b border-(--chat-border)"
+            disabled={isStreaming}
+            className={`w-full flex items-center gap-2 px-3 py-2 text-xs transition-colors border-b border-(--chat-border) ${
+              isStreaming
+                ? "text-(--chat-text-muted) cursor-not-allowed"
+                : "text-(--chat-accent) hover:bg-(--chat-bg-secondary)"
+            }`}
           >
             <Plus size={14} />
             New Chat
           </button>
 
           <div className="max-h-48 overflow-y-auto">
-            {state.sessions.map((session) => (
-              <div
-                key={session.id}
-                className={`
-                  flex items-center justify-between px-3 py-2 text-xs hover:bg-(--chat-bg-secondary) transition-colors cursor-pointer
-                  ${session.id === state.currentSession?.id ? "bg-(--chat-bg-secondary)" : ""}
-                `}
-                onClick={() => handleSwitch(session.id)}
-                onKeyDown={(e) => e.key === "Enter" && handleSwitch(session.id)}
-              >
+            {state.sessions.map((session) => {
+              const isCurrent = session.id === state.currentSession?.id;
+              const isDisabled = isStreaming && !isCurrent;
+              return (
+                <div
+                  key={session.id}
+                  className={`
+                    flex items-center justify-between px-3 py-2 text-xs transition-colors
+                    ${isCurrent ? "bg-(--chat-bg-secondary)" : ""}
+                    ${isDisabled ? "cursor-not-allowed opacity-50" : "cursor-pointer hover:bg-(--chat-bg-secondary)"}
+                  `}
+                  onClick={() => !isDisabled && handleSwitch(session.id)}
+                  onKeyDown={(e) => e.key === "Enter" && !isDisabled && handleSwitch(session.id)}
+                >
                 <div className="flex items-center gap-2 min-w-0 flex-1">
                   {session.id === state.currentSession?.id ? (
                     <Check size={12} className="text-(--chat-accent) shrink-0" />
@@ -184,18 +194,24 @@ function SessionDropdown({ onSelect }: { onSelect: () => void }) {
                   {session.messages.length}
                 </span>
               </div>
-            ))}
+              );
+            })}
           </div>
 
           {state.sessions.length > 1 && state.currentSession && (
             <button
               type="button"
+              disabled={isStreaming}
               onClick={async (e) => {
                 e.stopPropagation();
                 await deleteCurrentSession();
                 setOpen(false);
               }}
-              className="w-full flex items-center gap-2 px-3 py-2 text-xs text-(--chat-error) hover:bg-(--chat-bg-secondary) transition-colors border-t border-(--chat-border)"
+              className={`w-full flex items-center gap-2 px-3 py-2 text-xs transition-colors border-t border-(--chat-border) ${
+                isStreaming
+                  ? "text-(--chat-text-muted) cursor-not-allowed"
+                  : "text-(--chat-error) hover:bg-(--chat-bg-secondary)"
+              }`}
             >
               <Trash2 size={14} />
               Delete Current Session

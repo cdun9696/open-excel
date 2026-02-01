@@ -525,8 +525,11 @@ export function ChatProvider({ children }: { children: ReactNode }) {
       console.error("[Chat] Cannot create session: workbookId not set");
       return;
     }
+    if (isStreamingRef.current) {
+      console.log("[Chat] newSession blocked: streaming in progress");
+      return;
+    }
     try {
-      abort();
       agentRef.current?.reset();
       const session = await createSession(workbookIdRef.current);
       console.log("[Chat] Created new session:", session.id);
@@ -542,13 +545,16 @@ export function ChatProvider({ children }: { children: ReactNode }) {
     } catch (err) {
       console.error("[Chat] Failed to create session:", err);
     }
-  }, [abort, refreshSessions]);
+  }, [refreshSessions]);
 
   const switchSession = useCallback(
     async (sessionId: string) => {
       console.log("[Chat] switchSession called:", sessionId, "current:", currentSessionIdRef.current);
       if (currentSessionIdRef.current === sessionId) return;
-      abort();
+      if (isStreamingRef.current) {
+        console.log("[Chat] switchSession blocked: streaming in progress");
+        return;
+      }
       agentRef.current?.reset();
       try {
         const session = await getSession(sessionId);
@@ -569,12 +575,15 @@ export function ChatProvider({ children }: { children: ReactNode }) {
         console.error("[Chat] Failed to switch session:", err);
       }
     },
-    [abort],
+    [],
   );
 
   const deleteCurrentSession = useCallback(async () => {
     if (!currentSessionIdRef.current || !workbookIdRef.current) return;
-    abort();
+    if (isStreamingRef.current) {
+      console.log("[Chat] deleteCurrentSession blocked: streaming in progress");
+      return;
+    }
     agentRef.current?.reset();
     await deleteSession(currentSessionIdRef.current);
     const session = await getOrCreateCurrentSession(workbookIdRef.current);
@@ -587,7 +596,7 @@ export function ChatProvider({ children }: { children: ReactNode }) {
       error: null,
       sessionStats: INITIAL_STATS,
     }));
-  }, [abort, refreshSessions]);
+  }, [refreshSessions]);
 
   const prevStreamingRef = useRef(false);
   useEffect(() => {
