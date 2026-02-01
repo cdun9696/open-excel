@@ -2,6 +2,9 @@
 
 An open-source Claude for Excel clone. A Microsoft Office Excel Add-in with an integrated AI chat interface that lets you chat with LLM providers (OpenAI, Anthropic, Google, etc.) directly within Excel using your own API keys (BYOK).
 
+https://github.com/user-attachments/assets/50f3ba42-4daa-49d8-b31e-bae9be6e225b
+
+
 ## Installation (End Users)
 
 Download [`manifest.prod.xml`](./manifest.prod.xml) and follow the instructions for your platform:
