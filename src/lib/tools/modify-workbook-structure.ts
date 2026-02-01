@@ -14,8 +14,6 @@ export const modifyWorkbookStructureTool = defineTool({
     sheetId: Type.Optional(Type.Number({ description: "Sheet ID for delete/rename/duplicate" })),
     sheetName: Type.Optional(Type.String({ description: "Name for new sheet (create)" })),
     newName: Type.Optional(Type.String({ description: "New name (rename) or name for copy (duplicate)" })),
-    rows: Type.Optional(Type.Number({ description: "Rows for new sheet. Default: 1000" })),
-    columns: Type.Optional(Type.Number({ description: "Columns for new sheet. Default: 26" })),
     tabColor: Type.Optional(Type.String({ description: "Tab color as hex, e.g. '#ff0000'" })),
     explanation: Type.Optional(
       Type.String({
@@ -31,8 +29,6 @@ export const modifyWorkbookStructureTool = defineTool({
         sheetId: params.sheetId,
         sheetName: params.sheetName,
         newName: params.newName,
-        rows: params.rows,
-        columns: params.columns,
         tabColor: params.tabColor,
       });
       return toolSuccess(result);

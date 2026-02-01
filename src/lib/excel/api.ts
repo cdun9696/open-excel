@@ -208,7 +208,7 @@ export async function getRangeAsCsv(
   rangeAddr: string,
   options: { includeHeaders?: boolean; maxRows?: number } = {},
 ): Promise<GetRangeAsCsvResult> {
-  const { maxRows = 500 } = options;
+  const { includeHeaders = true, maxRows = 500 } = options;
 
   return Excel.run(async (context) => {
     const sheet = await getWorksheetById(context, sheetId);
@@ -219,11 +219,13 @@ export async function getRangeAsCsv(
     range.load("values,rowCount,columnCount");
     await context.sync();
 
-    const actualRows = Math.min(range.rowCount, maxRows);
-    const hasMore = range.rowCount > maxRows;
+    const startRow = includeHeaders ? 0 : 1;
+    const availableRows = range.rowCount - startRow;
+    const actualRows = Math.min(availableRows, maxRows);
+    const hasMore = availableRows > maxRows;
 
     const rows: string[] = [];
-    for (let r = 0; r < actualRows; r++) {
+    for (let r = startRow; r < startRow + actualRows; r++) {
       const row = range.values[r].map((v) => {
         if (v === null || v === undefined) return "";
         const str = String(v);
@@ -510,7 +512,7 @@ export async function setCellRange(
     for (let r = 0; r < cells.length; r++) {
       for (let c = 0; c < cells[r].length; c++) {
         const cell = cells[r][c];
-        if (!cell.cellStyles && !cell.note) continue;
+        if (!cell.cellStyles && !cell.borderStyles && !cell.note) continue;
 
         const cellRange = range.getCell(r, c);
 
@@ -528,6 +530,41 @@ export async function setCellRange(
             cellRange.format.horizontalAlignment = s.horizontalAlignment as Excel.HorizontalAlignment;
           }
           if (s.numberFormat) cellRange.numberFormat = [[s.numberFormat]];
+        }
+
+        if (cell.borderStyles) {
+          const b = cell.borderStyles;
+          const sideMap: { key: keyof typeof b; index: Excel.BorderIndex }[] = [
+            { key: "top", index: Excel.BorderIndex.edgeTop },
+            { key: "bottom", index: Excel.BorderIndex.edgeBottom },
+            { key: "left", index: Excel.BorderIndex.edgeLeft },
+            { key: "right", index: Excel.BorderIndex.edgeRight },
+          ];
+          for (const { key, index } of sideMap) {
+            const side = b[key];
+            if (!side) continue;
+            const border = cellRange.format.borders.getItem(index);
+            if (side.style) {
+              const styleMap: Record<string, Excel.BorderLineStyle> = {
+                solid: Excel.BorderLineStyle.continuous,
+                dashed: Excel.BorderLineStyle.dash,
+                dotted: Excel.BorderLineStyle.dot,
+                double: Excel.BorderLineStyle.double,
+              };
+              border.style = styleMap[side.style] ?? Excel.BorderLineStyle.continuous;
+            }
+            if (side.weight) {
+              const weightMap: Record<string, Excel.BorderWeight> = {
+                thin: Excel.BorderWeight.thin,
+                medium: Excel.BorderWeight.medium,
+                thick: Excel.BorderWeight.thick,
+              };
+              border.weight = weightMap[side.weight] ?? Excel.BorderWeight.thin;
+            }
+            if (side.color) {
+              border.color = side.color;
+            }
+          }
         }
 
         if (cell.note) {
@@ -647,7 +684,7 @@ export async function modifySheetStructure(
     position?: "before" | "after";
   },
 ): Promise<ModifySheetStructureResult> {
-  const { operation, dimension, reference, count: _count = 1, position = "before" } = params;
+  const { operation, dimension, reference, count = 1, position = "before" } = params;
 
   return Excel.run(async (context) => {
     const sheet = await getWorksheetById(context, sheetId);
@@ -659,21 +696,33 @@ export async function modifySheetStructure(
       sheet.freezePanes.unfreeze();
     } else if (reference) {
       const isRow = dimension === "rows";
-      const rangeRef = isRow ? `${reference}:${reference}` : `${reference}:${reference}`;
+      let rangeRef: string;
+      let afterRangeRef: string;
+
+      if (isRow) {
+        const startRow = Number.parseInt(reference, 10);
+        const endRow = startRow + count - 1;
+        rangeRef = `${startRow}:${endRow}`;
+        afterRangeRef = `${startRow + 1}:${endRow + 1}`;
+      } else {
+        const startCol = letterToColumnIndex(reference);
+        const endCol = startCol + count - 1;
+        rangeRef = `${reference}:${columnIndexToLetter(endCol)}`;
+        afterRangeRef = `${columnIndexToLetter(startCol + 1)}:${columnIndexToLetter(endCol + 1)}`;
+      }
+
       const targetRange = sheet.getRange(rangeRef);
 
       switch (operation) {
-        case "insert":
-          if (isRow) {
-            targetRange.insert(
-              position === "before" ? Excel.InsertShiftDirection.down : Excel.InsertShiftDirection.down,
-            );
+        case "insert": {
+          const shiftDir = isRow ? Excel.InsertShiftDirection.down : Excel.InsertShiftDirection.right;
+          if (position === "after") {
+            sheet.getRange(afterRangeRef).insert(shiftDir);
           } else {
-            targetRange.insert(
-              position === "before" ? Excel.InsertShiftDirection.right : Excel.InsertShiftDirection.right,
-            );
+            targetRange.insert(shiftDir);
           }
           break;
+        }
         case "delete":
           targetRange.delete(isRow ? Excel.DeleteShiftDirection.up : Excel.DeleteShiftDirection.left);
           break;
@@ -699,6 +748,13 @@ export async function modifySheetStructure(
   });
 }
 
+function letterToColumnIndex(letter: string): number {
+  return letter
+    .toUpperCase()
+    .split("")
+    .reduce((acc, c) => acc * 26 + c.charCodeAt(0) - 64, 0) - 1;
+}
+
 export interface ModifyWorkbookStructureResult {
   success: boolean;
   operation: string;
@@ -711,8 +767,6 @@ export async function modifyWorkbookStructure(params: {
   sheetId?: number;
   sheetName?: string;
   newName?: string;
-  rows?: number;
-  columns?: number;
   tabColor?: string;
 }): Promise<ModifyWorkbookStructureResult> {
   const { operation, sheetId, sheetName, newName, tabColor } = params;

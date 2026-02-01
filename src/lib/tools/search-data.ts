@@ -8,7 +8,6 @@ const SearchOptionsSchema = Type.Optional(
     matchEntireCell: Type.Optional(Type.Boolean({ description: "Match entire cell content. Default: false" })),
     matchFormulas: Type.Optional(Type.Boolean({ description: "Search in formulas. Default: false" })),
     useRegex: Type.Optional(Type.Boolean({ description: "Use regex pattern. Default: false" })),
-    ignoreDiacritics: Type.Optional(Type.Boolean({ description: "Ignore accents. Default: true" })),
     maxResults: Type.Optional(Type.Number({ description: "Max results. Default: 500" })),
   }),
 );
