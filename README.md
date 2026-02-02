@@ -4,6 +4,7 @@ An open-source Claude for Excel clone. A Microsoft Office Excel Add-in with an i
 
 https://github.com/user-attachments/assets/50f3ba42-4daa-49d8-b31e-bae9be6e225b
 
+> **Reference:** The original Claude for Excel system prompt, tools spec, and RPC protocol were reverse-engineered and documented at [hewliyang/reversing/claude-for-excel](https://github.com/hewliyang/reversing/tree/main/claude-for-excel).
 
 ## Installation (End Users)
 
