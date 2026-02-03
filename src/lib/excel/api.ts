@@ -597,6 +597,8 @@ export async function setCellRange(
         if (cell.note) {
           cellRange.load("address");
           await context.sync();
+          const cellAddr = cellRange.address.split("!")[1] || cellRange.address;
+          sheet.notes.add(cellAddr, cell.note);
         }
       }
     }
