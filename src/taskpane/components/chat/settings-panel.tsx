@@ -241,6 +241,7 @@ export function SettingsPanel() {
             and Z.ai.
           </p>
         )}
+        <p className="text-[10px] text-(--chat-text-muted) mt-3">v{__APP_VERSION__}</p>
       </div>
     </div>
   );

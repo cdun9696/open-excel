@@ -161,6 +161,7 @@ module.exports = async (env, options) => {
         "process.env": JSON.stringify({}),
         "process.versions": "undefined",
         "process.browser": JSON.stringify(true),
+        __APP_VERSION__: JSON.stringify(require("./package.json").version),
       }),
     ],
     devServer: {
