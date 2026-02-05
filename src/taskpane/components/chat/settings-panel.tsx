@@ -185,7 +185,7 @@ export function SettingsPanel() {
                 style={inputStyle}
               />
               <p className="text-[10px] text-(--chat-text-muted) mt-1">
-                Your proxy should accept ?url=encoded_url format
+                Override the default API endpoint URL
               </p>
             </label>
           )}
@@ -237,8 +237,7 @@ export function SettingsPanel() {
         </p>
         {useProxy && (
           <p className="text-xs text-(--chat-text-muted) leading-relaxed mt-2">
-            CORS Proxy: Requests route through your proxy to bypass browser CORS restrictions. Required for Claude OAuth
-            and Z.ai.
+            Endpoint Override: Use a custom API endpoint or CORS proxy to bypass browser restrictions.
           </p>
         )}
         <p className="text-[10px] text-(--chat-text-muted) mt-3">v{__APP_VERSION__}</p>

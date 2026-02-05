@@ -87,10 +87,10 @@ function loadSavedConfig(): ProviderConfig | null {
 }
 
 function applyProxyToModel(model: Model<any>, config: ProviderConfig): Model<any> {
-  if (!config.useProxy || !config.proxyUrl || !model.baseUrl) return model;
+  if (!config.useProxy || !config.proxyUrl) return model;
   return {
     ...model,
-    baseUrl: `${config.proxyUrl}/?url=${encodeURIComponent(model.baseUrl)}`,
+    baseUrl: config.proxyUrl,
   };
 }
 
