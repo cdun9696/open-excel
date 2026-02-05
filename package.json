@@ -29,8 +29,8 @@
     "watch": "webpack --mode development --watch"
   },
   "dependencies": {
-    "@mariozechner/pi-agent-core": "https://github.com/huangdaxianer/pi-mono.git#main",
-    "@mariozechner/pi-ai": "https://github.com/huangdaxianer/pi-mono.git#main",
+    "@mariozechner/pi-agent-core": "https://github.com/huangdaxianer/pi-mono.git#main:packages/agent",
+    "@mariozechner/pi-ai": "https://github.com/huangdaxianer/pi-mono.git#main:packages/ai",
     "@sinclair/typebox": "^0.34.48",
     "@streamdown/code": "^1.0.1",
     "core-js": "^3.36.0",
