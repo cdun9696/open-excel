@@ -55,6 +55,7 @@ export interface ProviderConfig {
   provider: string;
   apiKey: string;
   model: string;
+  customModel?: string;
   useProxy: boolean;
   proxyUrl: string;
   thinking: ThinkingLevel;
@@ -87,11 +88,14 @@ function loadSavedConfig(): ProviderConfig | null {
 }
 
 function applyProxyToModel(model: Model<any>, config: ProviderConfig): Model<any> {
-  if (!config.useProxy || !config.proxyUrl) return model;
-  return {
-    ...model,
-    baseUrl: config.proxyUrl,
-  };
+  const result = { ...model };
+  if (config.useProxy && config.proxyUrl) {
+    result.baseUrl = config.proxyUrl;
+  }
+  if (config.customModel) {
+    result.id = config.customModel;
+  }
+  return result;
 }
 
 interface ChatState {

@@ -8,6 +8,7 @@ interface SavedConfig {
   provider: string;
   apiKey: string;
   model: string;
+  customModel?: string;
   useProxy: boolean;
   proxyUrl: string;
   thinking: ThinkingLevel;
@@ -29,11 +30,15 @@ function saveConfig(
   provider: string,
   apiKey: string,
   model: string,
+  customModel: string,
   useProxy: boolean,
   proxyUrl: string,
   thinking: ThinkingLevel,
 ) {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify({ provider, apiKey, model, useProxy, proxyUrl, thinking }));
+  localStorage.setItem(
+    STORAGE_KEY,
+    JSON.stringify({ provider, apiKey, model, customModel, useProxy, proxyUrl, thinking }),
+  );
 }
 
 const THINKING_LEVELS: { value: ThinkingLevel; label: string }[] = [
@@ -50,6 +55,7 @@ export function SettingsPanel() {
   const [provider, setProvider] = useState(() => saved?.provider || "");
   const [apiKey, setApiKey] = useState(() => saved?.apiKey || "");
   const [model, setModel] = useState(() => saved?.model || "");
+  const [customModel, setCustomModel] = useState(() => saved?.customModel || "");
   const [showKey, setShowKey] = useState(false);
   const [useProxy, setUseProxy] = useState(() => saved?.useProxy !== false);
   const [proxyUrl, setProxyUrl] = useState(() => saved?.proxyUrl || "");
@@ -57,10 +63,10 @@ export function SettingsPanel() {
 
   useEffect(() => {
     if (provider && apiKey && model) {
-      saveConfig(provider, apiKey, model, useProxy, proxyUrl, thinking);
-      setProviderConfig({ provider, apiKey, model, useProxy, proxyUrl, thinking });
+      saveConfig(provider, apiKey, model, customModel, useProxy, proxyUrl, thinking);
+      setProviderConfig({ provider, apiKey, model, customModel, useProxy, proxyUrl, thinking });
     }
-  }, [provider, apiKey, model, useProxy, proxyUrl, thinking, setProviderConfig]);
+  }, [provider, apiKey, model, customModel, useProxy, proxyUrl, thinking, setProviderConfig]);
 
   const models = provider ? getModelsForProvider(provider) : [];
 
@@ -121,6 +127,21 @@ export function SettingsPanel() {
                 </option>
               ))}
             </select>
+          </label>
+
+          <label className="block">
+            <span className="block text-xs text-(--chat-text-secondary) mb-1.5">Custom Model Name (Optional)</span>
+            <input
+              type="text"
+              value={customModel}
+              onChange={(e) => setCustomModel(e.target.value)}
+              placeholder="e.g. claude-3-5-sonnet-latest"
+              className="w-full bg-(--chat-input-bg) text-(--chat-text-primary)
+                         text-sm px-3 py-2 border border-(--chat-border)
+                         placeholder:text-(--chat-text-muted)
+                         focus:outline-none focus:border-(--chat-border-active)"
+              style={inputStyle}
+            />
           </label>
 
           <label className="block">
