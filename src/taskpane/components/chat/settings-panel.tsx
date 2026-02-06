@@ -130,12 +130,12 @@ export function SettingsPanel() {
           </label>
 
           <label className="block">
-            <span className="block text-xs text-(--chat-text-secondary) mb-1.5">Custom Model Name (Optional)</span>
+            <span className="block text-xs text-(--chat-text-secondary) mb-1.5">自定义模型名称（选填）</span>
             <input
               type="text"
               value={customModel}
               onChange={(e) => setCustomModel(e.target.value)}
-              placeholder="e.g. claude-3-5-sonnet-latest"
+              placeholder="GLM-4-7-xxxx 或 ep-xxxxx"
               className="w-full bg-(--chat-input-bg) text-(--chat-text-primary)
                          text-sm px-3 py-2 border border-(--chat-border)
                          placeholder:text-(--chat-text-muted)
@@ -145,13 +145,13 @@ export function SettingsPanel() {
           </label>
 
           <label className="block">
-            <span className="block text-xs text-(--chat-text-secondary) mb-1.5">API Key</span>
+            <span className="block text-xs text-(--chat-text-secondary) mb-1.5">API Key（必填）</span>
             <div className="relative">
               <input
                 type={showKey ? "text" : "password"}
                 value={apiKey}
                 onChange={(e) => setApiKey(e.target.value)}
-                placeholder="Enter your API key"
+                placeholder="sk-xxxxxx"
                 className="w-full bg-(--chat-input-bg) text-(--chat-text-primary)
                            text-sm px-3 py-2 pr-10 border border-(--chat-border)
                            placeholder:text-(--chat-text-muted)
@@ -254,7 +254,7 @@ export function SettingsPanel() {
       <div className="border-t border-(--chat-border) pt-4">
         <div className="text-[10px] uppercase tracking-widest text-(--chat-text-muted) mb-2">about</div>
         <p className="text-xs text-(--chat-text-secondary) leading-relaxed">
-          OpenExcel uses your own API key to connect to LLM providers. Your key is stored locally in the browser.
+          方舟测试专用版本
         </p>
         {useProxy && (
           <p className="text-xs text-(--chat-text-muted) leading-relaxed mt-2">

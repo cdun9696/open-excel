@@ -27,6 +27,7 @@ import {
   saveSession,
 } from "../../../lib/storage";
 import { EXCEL_TOOLS } from "../../../lib/tools";
+import { CUSTOM_MODELS } from "./custom-models";
 
 export type ToolCallStatus = "pending" | "running" | "complete" | "error";
 
@@ -196,7 +197,7 @@ function extractPartsFromAssistantMessage(message: AgentMessage, existingParts: 
   });
 }
 
-export function ChatProvider({ children }: { children: ReactNode }) {
+export function ChatProvider({ children }: { children: ReactNode }) { 
   const [state, setState] = useState<ChatState>(() => {
     const saved = loadSavedConfig();
     const validConfig = saved?.provider && saved?.apiKey && saved?.model ? saved : null;
@@ -219,13 +220,31 @@ export function ChatProvider({ children }: { children: ReactNode }) {
   const sessionLoadedRef = useRef(false);
   const currentSessionIdRef = useRef<string | null>(null);
 
-  const availableProviders = getProviders();
+  const availableProviders = Array.from(
+    new Set([...getProviders(), ...Object.keys(CUSTOM_MODELS)]),
+  );
 
   const getModelsForProvider = useCallback((provider: string): Model<any>[] => {
     try {
-      return getModels(provider as any);
-    } catch {
-      return [];
+      const defaultModels = getModels(provider as any) || [];
+      const customModels = CUSTOM_MODELS[provider] || [];
+      
+      // Merge models, preferring custom ones if IDs clash (though unlikely with this structure)
+      // or simply concatenate them.
+      // We'll concatenate them, but deduplicate by ID if needed.
+      const allModels = [...defaultModels, ...customModels];
+      
+      // Deduplicate by ID
+      const seen = new Set();
+      return allModels.filter(m => {
+        if (seen.has(m.id)) return false;
+        seen.add(m.id);
+        return true;
+      });
+    } catch (err) {
+      console.warn(`Error fetching models for ${provider}:`, err);
+      // Fallback to just custom models if the library call fails
+      return CUSTOM_MODELS[provider] || [];
     }
   }, []);
 
@@ -402,7 +421,32 @@ export function ChatProvider({ children }: { children: ReactNode }) {
       let contextWindow = 0;
       let baseModel: Model<any>;
       try {
-        baseModel = getModel(config.provider as any, config.model as any);
+        const modelId = config.customModel || config.model;
+        baseModel = getModel(config.provider as any, modelId as any);
+
+        // If not found in default registry, look in custom models
+        if (!baseModel) {
+          const customList = CUSTOM_MODELS[config.provider] || [];
+          baseModel = customList.find((m) => m.id === modelId);
+        }
+
+        if (!baseModel) {
+          // Fallback: create a temporary model object if we really can't find definition
+          // This supports the "Custom Model Name" feature where user types ANY string
+          // and we just assume it works with the current provider's base URL.
+          // We'll try to find *any* model from this provider to get the API type and base URL template.
+          const anyModel = getModelsForProvider(config.provider)?.[0];
+          if (anyModel) {
+             baseModel = {
+                ...anyModel,
+                id: modelId,
+                name: modelId, // Use ID as name
+             };
+          } else {
+             console.error(`Could not find model definition for ${modelId} and no default models found for ${config.provider}`);
+             return;
+          }
+        }
         contextWindow = baseModel.contextWindow;
       } catch {
         return;
