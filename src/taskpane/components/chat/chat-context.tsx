@@ -468,9 +468,22 @@ export function ChatProvider({ children }: { children: ReactNode }) {
           messages: existingMessages,
         },
         streamFn: (model, context, options) => {
+          const extraHeaders: Record<string, string> = {};
+          if (model.provider === "doubao-test-log") {
+            if (workbookIdRef.current) {
+              extraHeaders["X-User-Id"] = workbookIdRef.current;
+            }
+            if (currentSessionIdRef.current) {
+              extraHeaders["X-Session-Id"] = currentSessionIdRef.current;
+            }
+          }
           return streamSimple(model, context, {
             ...options,
             apiKey: config.apiKey,
+            headers: {
+              ...options?.headers,
+              ...extraHeaders,
+            },
           });
         },
       });
