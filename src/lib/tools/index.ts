@@ -1,6 +1,6 @@
 export { clearCellRangeTool } from "./clear-cell-range";
 export { copyToTool } from "./copy-to";
-export { evalOfficeJsTool } from "./eval-officejs";
+//export { evalOfficeJsTool } from "./eval-officejs";
 export { getAllObjectsTool } from "./get-all-objects";
 export { getCellRangesTool } from "./get-cell-ranges";
 export { getRangeAsCsvTool } from "./get-range-as-csv";
@@ -14,7 +14,7 @@ export { defineTool, type ToolResult, toolError, toolSuccess } from "./types";
 
 import { clearCellRangeTool } from "./clear-cell-range";
 import { copyToTool } from "./copy-to";
-import { evalOfficeJsTool } from "./eval-officejs";
+//import { evalOfficeJsTool } from "./eval-officejs";
 import { getAllObjectsTool } from "./get-all-objects";
 import { getCellRangesTool } from "./get-cell-ranges";
 import { getRangeAsCsvTool } from "./get-range-as-csv";
@@ -37,5 +37,5 @@ export const EXCEL_TOOLS = [
   modifyWorkbookStructureTool,
   resizeRangeTool,
   modifyObjectTool,
-  evalOfficeJsTool,
+//  evalOfficeJsTool,
 ];
